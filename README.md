@@ -2,7 +2,7 @@
 Please note: 
 **This plugin is intended to work with Android only**
 
-A helper plugin for native Android Widgets with Flutter allowing headless communication between an Android Widget and Dart code so you can interact with the AppWidget without needing Flutter open.
+A helper plugin allowing headless communication between an Android Widget and Dart code so you can interact with the AppWidget without needing a Flutter Application open.
 
 ## Overview
 You can use this plugin to 'plug' your Android App Widget into your Flutter application using *action* strings common to both your Flutter and Native code registered to static or top level dart functions that are stored in shared memory.
