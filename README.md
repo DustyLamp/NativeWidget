@@ -1,3 +1,4 @@
+
 # NativeWidget
 Please note: 
 **This plugin is intended to work with Android only**
@@ -11,8 +12,12 @@ You'll need a set of *action* strings for sending from Native to Dart and anothe
 
 ## Getting Started
 
-1. Add the latest version of this package to pubspec.yaml
-2. Create actions as strings for each use case that will be sent to and from your native code in your dart code
+1. **Add the latest version of this package to pubspec.yaml**
+2. **Create the NativeWidget Plugin instance**
+
+Call `NativeWidget();` as soon as possible in your application to create the instance. The example does it as the first operation in `main()`
+
+3. **Create actions as strings for each use case that will be sent to and from your native code in your dart code**
 ```  
 //Native to Dart
 const  String nativeItemTapped = "NATIVE_ITEM_TAPPED";
@@ -25,7 +30,7 @@ const  String receiveWords = "RECEIVE_WORDS";
 const  String newWord = "NEW_WORD";
 const  String pressedWords = "PRESSED_WORDS";
 ```
-3. Create **static or top level** functions for each action that will be **sent from** native code
+4. **Create *static or top level* functions for each action that will be *sent from* native code**
 ```
 static void handleGetWords(dynamic args) async {
 	print("Handling Get Words Request");
@@ -33,7 +38,7 @@ static void handleGetWords(dynamic args) async {
 	//Do some code
 }
 ```
-4. Register these functions as callbacks that will be called when the corresponding  action is received from native code
+5. **Register these functions as callbacks that will be called when the corresponding  action is received from native code**
 ```
 NativeWidget.registerActionCallbacks({
 	getWords: _MyAppState.handleGetWords,
@@ -41,7 +46,15 @@ NativeWidget.registerActionCallbacks({
 	nativeItemTapped: _MyAppState.handleItemTapped,
 });
 ```
-5. Register your AppWidgets as the receivers for actions **sent to** native code
+6. **Initialize the NativeWidget plugin**
+
+	Add:
+```
+NativeWidget.initialize();
+```
+I recommend to add this after you've registered your callback functions and actions in step 5.
+
+7. **Register your AppWidgets as the receivers for actions *sent to* native code**
 ```
 @Override  
 protected void onCreate(Bundle savedInstanceState) {  
@@ -59,7 +72,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 *Note: Currently each action can only be registered to one App Widget as action are considered unique.*
 
-6. Update the android manifest to use the NativeWidgetService
+8. **Update the android manifest to use the NativeWidgetService**
 ```
 <application ...>
 
