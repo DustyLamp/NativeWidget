@@ -15,7 +15,7 @@ You'll need a set of *action* strings for sending from Native to Dart and anothe
 1. **Add the latest version of this package to pubspec.yaml**
 2. **Create the NativeWidget Plugin instance**
 
-Call `NativeWidget();` as soon as possible in your application to create the instance. The example does it as the first operation in `main()`
+Call `NativeWidget();` as soon as possible in your application to create the instance. This is the first operation in the example in `main()`
 
 3. **Create actions as strings for each use case that will be sent to and from your native code in your dart code**
 ```  
