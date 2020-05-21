@@ -6,14 +6,16 @@ import 'package:random_words/random_words.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+//Native to Dart
 const String nativeItemTapped = "NATIVE_ITEM_TAPPED";
-const String flutterItemTapped = "FLUTTER_ITEM_TAPPED";
-const String newWord = "NEW_WORD";
-const String initializeData = "INITIALIZE_DATA";
-const String getWords = "GET_WORDS";
-const String receiveWords = "RECEIVE_WORDS";
-const String pressedWords = "PRESSED_WORDS";
 const String refreshWords = "REFRESH_WORDS";
+const String getWords = "GET_WORDS";
+
+//Dart to Native
+const String flutterItemTapped = "FLUTTER_ITEM_TAPPED";
+const String receiveWords = "RECEIVE_WORDS";
+const String newWord = "NEW_WORD";
+const String pressedWords = "PRESSED_WORDS";
 
 const String sharedPreferenceWordsPressedKey = "SHARED_PREF_WORDS_PRESSED";
 const String sharedPreferenceWordListKey = "SHARED_PREF_WORDS_LIST";

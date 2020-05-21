@@ -1,5 +1,9 @@
 package net.realapps.nativewidget_example;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
 import net.realapps.nativewidget.NativeWidgetPlugin;
 import net.realapps.nativewidget.NativeWidgetService;
 
@@ -12,6 +16,7 @@ import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.PRE
 import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.RECEIVE_WORDS;
 
 public class Application extends FlutterApplication implements PluginRegistry.PluginRegistrantCallback {
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onCreate() {
         super.onCreate();

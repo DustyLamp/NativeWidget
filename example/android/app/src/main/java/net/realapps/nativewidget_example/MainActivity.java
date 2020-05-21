@@ -1,6 +1,9 @@
 package net.realapps.nativewidget_example;
 
+import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.RequiresApi;
 
 import net.realapps.nativewidget.NativeWidgetPlugin;
 
@@ -15,6 +18,7 @@ import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.REC
 public class MainActivity extends FlutterActivity {
     public static final String TAG = "NativeWidgetExampleMainActivity";
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
