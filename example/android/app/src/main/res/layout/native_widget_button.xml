@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/native_widget_button"
+    android:layout_margin="4dp"
+    android:layout_width="match_parent"
+    android:layout_columnWeight=".5"
+    android:layout_height="50dp"
+    android:gravity="center"
+    android:textColor="#FAFAFA"
+    android:background="#000000"
+    android:textStyle="bold"
+    android:textSize="20sp" />
