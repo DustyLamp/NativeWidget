@@ -41,7 +41,7 @@ NativeWidget.registerActionCallbacks({
 	nativeItemTapped: _MyAppState.handleItemTapped,
 });
 ```
-5. Register your AppWidgets as the receivers for actions **sent to** native code
+5. Register your AppWidgets as the receivers for actions **sent to** native code in MainActivity and Application
 ```
 @Override  
 protected void onCreate(Bundle savedInstanceState) {  
@@ -58,6 +58,18 @@ protected void onCreate(Bundle savedInstanceState) {
 ```
 
 *Note: Currently each action can only be registered to one App Widget as action are considered unique.*
+
+In `AndroidManifest.xml` change `android:name` to ".Application" like so:
+
+```
+<application
+        android:name=".Application"
+		...>
+	...
+</application>
+```
+
+See the example for... an example.
 
 6. Update the android manifest to use the NativeWidgetService
 ```

@@ -47,7 +47,7 @@ public class NativeWidgetService extends JobIntentService {
 
         intent.putExtra(ACTION_CALLBACK_HANDLE_KEY, actionCallbackHandle);
 
-        enqueueWork(context, NativeWidgetService.class, JOB_ID, intent);
+        NativeWidgetService.enqueueWork(context, NativeWidgetService.class, JOB_ID, intent);
     }
 
 //    public static void registerReceiverForAction(Context context, String action, BroadcastReceiver receiver){
@@ -55,6 +55,7 @@ public class NativeWidgetService extends JobIntentService {
 //    }
 
     public static void startBackgroundIsolate(Context context, long callbackHandle) {
+        Log.d(TAG, "startBackgroundIsolate: ");
         if (nativeWidgetBackgroundExecutor != null) {
             Log.w(TAG, "Attempted to start a duplicate background isolate. Returning...");
             return;
@@ -75,21 +76,26 @@ public class NativeWidgetService extends JobIntentService {
     }
 
     public static void setCallbackDispatcher(Context context, long callbackHandle) {
+        Log.d(TAG, "setCallbackDispatcher:");
         NativeWidgetBackgroundExecutor.setCallbackDispatcher(context, callbackHandle);
     }
 
     public static void registerActionCallback(Context context, long actionCallbackHandle, String actionCallbackhandleKey){
+        Log.d(TAG, "registerActionCallback: ");
         NativeWidgetBackgroundExecutor.registerActionCallback(context, actionCallbackHandle, actionCallbackhandleKey);
     }
 
     public static void setPluginRegistrant(PluginRegistry.PluginRegistrantCallback callback) {
+        Log.d(TAG, "setPluginRegistrant: ");
         NativeWidgetBackgroundExecutor.setPluginRegistrant(callback);
     }
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: Creating Native Widget Service");
         super.onCreate();
         if (nativeWidgetBackgroundExecutor == null) {
+            Log.d(TAG, "onCreate: Creating new NativeWidgetBackgroundExecutor");
             nativeWidgetBackgroundExecutor = new NativeWidgetBackgroundExecutor();
         }
         Context context = getApplicationContext();
@@ -97,7 +103,14 @@ public class NativeWidgetService extends JobIntentService {
     }
 
     @Override
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy: Destroying NativeWidgetService");
+        super.onDestroy();
+    }
+
+    @Override
     protected void onHandleWork(@NonNull final Intent intent) {
+        Log.d(TAG, "onHandleWork: Handling Work");
 
         synchronized (queue) {
             if (!nativeWidgetBackgroundExecutor.isRunning()) {

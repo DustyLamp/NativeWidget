@@ -1,5 +1,6 @@
 package net.realapps.nativewidget_example;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -9,6 +10,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -19,7 +21,10 @@ import com.google.gson.Gson;
 import net.realapps.nativewidget.NativeWidgetService;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,23 +49,21 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     static String NATIVE_STORAGE = "NATIVE_STORAGE";
     static String WORD_BUTTONS = "WORD_BUTTONS";
 
-//    static int sAppWidgetId = 0;
-
     @Override
     public void onDeleted(Context context, int[] appWidgetIds){
+        Log.d(TAG, "onDeleted: ");
         super.onDeleted(context, appWidgetIds);
     }
 
     @Override
     public void onDisabled(Context context) {
-        // Enter relevant functionality for when the last widget is disabled
+        Log.d(TAG, "onDisabled: ");
         super.onDisabled(context);
     }
 
     @Override
     public void onEnabled(Context context) {
-        // Enter relevant functionality for when the first widget is created
-//        NativeWidgetPlugin.registerReceiverForAction(context, FLUTTER_ITEM_TAPPED, this.getClass());
+        Log.d(TAG, "onEnabled: ");
         Intent sendActionIntent = new Intent(context, NativeWidgetService.class);
         sendActionIntent.setAction(GET_WORDS);
 
@@ -70,6 +73,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,
                                           int appWidgetId, Bundle newOptions) {
+        Log.d(TAG, "onAppWidgetOptionsChanged: ");
 
         storeAppWidgetId(appWidgetId, context);
 
@@ -81,8 +85,6 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent){
         Log.d(TAG, "onReceive: On Receive Event! Action: " + intent.getAction());
 
-//        String AppWidgetId = intent.getStringExtra(APP_WIDGET_ID);
-
         int appWidgetId = getAppWidgetId(context);
 
         if(appWidgetId == 0){
@@ -92,11 +94,11 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
         if(intent.getAction().equals(NATIVE_ITEM_TAPPED)){
             String word = intent.getStringExtra(WORD_NAME);
 
-            handleNativeItemTapped(context, word, AppWidgetManager.getInstance(context), appWidgetId);
+            handleNativeItemTapped(context, word);
         } else if(intent.getAction().equals(FLUTTER_ITEM_TAPPED)){
             String word = intent.getSerializableExtra(NativeWidgetService.PAYLOAD_KEY).toString();
 
-            handleFlutterItemTapped(context, word, AppWidgetManager.getInstance(context), appWidgetId);
+            handleFlutterItemTapped(context, word);
 
             Log.d(TAG, "onReceive: Got word tapped: " + word);
         } else if(intent.getAction().equals(RECEIVE_WORDS)){
@@ -105,7 +107,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
             Log.d(TAG, "onReceive: Got words: " + words);
 
             if(words != null){
-                storeWordsInNativeStorage((ArrayList) words, context, AppWidgetManager.getInstance(context), appWidgetId);
+                storeWordsInNativeStorage((ArrayList) words, context);
             }
         } else if(intent.getAction().equals(PRESSED_WORDS)){
             Serializable words = intent.getSerializableExtra(NativeWidgetService.PAYLOAD_KEY);
@@ -113,7 +115,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
             Log.d(TAG, "onReceive: Got words: " + words);
 
             if(words != null){
-                storePressedWordsInNativeStorage((ArrayList) words, context, AppWidgetManager.getInstance(context), appWidgetId);
+                storePressedWordsInNativeStorage((ArrayList) words, context);
             }
         } else if(intent.getAction().equals(NEW_WORD)){
             String word = intent.getSerializableExtra(NativeWidgetService.PAYLOAD_KEY).toString();
@@ -121,10 +123,10 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
             Log.d(TAG, "onReceive: Got new word: " + word);
 
             if(word != null){
-                storeWordInNativeStorage(word, context, AppWidgetManager.getInstance(context), appWidgetId);
+                storeWordInNativeStorage(word, context);
             }
         } else if(intent.getAction().equals(REFRESH_WORDS)){
-            handleRefreshTapped(context);
+            refreshWords(context);
         }
 
         super.onReceive(context, intent);
@@ -132,8 +134,10 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+        Log.d(TAG, "onUpdate: Updating AppWidget");
 
-        getWords(context);
+//        getWords(context);
+        refreshWords(context);
 
         for (int appWidgetId : appWidgetIds) {
             storeAppWidgetId(appWidgetId, context);
@@ -159,6 +163,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
             views.setPendingIntentTemplate(R.id.native_widget_grid, actionPendingIntent);
 
             appWidgetManager.updateAppWidget(appWidgetId, views);
+            notifyAppWidgetDataChanged(context);
 
         }
 
@@ -172,13 +177,33 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
         NativeWidgetService.enqueueWork(context, retrieveWordsIntent);
     }
 
-    void handleRefreshTapped(Context context){
+    void refreshWords(Context context){
+        Log.d(TAG, "refreshWords: Requesting Word Refresh");
         Intent sendActionIntent = new Intent(context, NativeWidgetService.class);
         sendActionIntent.setAction(REFRESH_WORDS);
         NativeWidgetService.enqueueWork(context, sendActionIntent);
+
+        setRefreshWordsAlarm(context);
     }
 
-    void handleNativeItemTapped(Context context, String word, AppWidgetManager appWidgetManager, int appWidgetId){
+    void setRefreshWordsAlarm(Context context){
+        Log.d(TAG, "setRefreshWordsAlarm: Setting refresh words alarm");
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.SECOND, 20);
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        Intent updateIntent = new Intent(context, NativeWidgetExampleAppWidget.class);
+        updateIntent.setAction(REFRESH_WORDS);
+        PendingIntent updatePendingIntent = PendingIntent.getBroadcast(context, 0, updateIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        alarmManager.cancel(updatePendingIntent);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), updatePendingIntent);
+    }
+
+    void handleNativeItemTapped(Context context, String word){
+        Log.d(TAG, "handleNativeItemTapped: ");
 
         List<WordButton> wordButtons = getWordButtonsFromStorage(context);
 
@@ -198,7 +223,8 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
 
         NativeWidgetService.enqueueWork(context, sendActionIntent);
     }
-    void handleFlutterItemTapped(Context context, String word, AppWidgetManager appWidgetManager, int appWidgetId){
+    void handleFlutterItemTapped(Context context, String word){
+        Log.d(TAG, "handleFlutterItemTapped: ");
 
         List<WordButton> wordButtons = getWordButtonsFromStorage(context);
 
@@ -214,22 +240,9 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    void storeWordsInNativeStorage(ArrayList<String> words, Context context, AppWidgetManager appWidgetManager, int appWidgetId){
-        List<WordButton> wordButtons = new ArrayList<>(); // getWordButtonsFromStorage(context);
-
-//        for(int iWord = 0; iWord < words.size(); ++iWord){
-//            boolean found = false;
-//            for(int iWordButton = 0; iWordButton < wordButtons.size(); ++iWordButton){
-//                if(wordButtons.get(iWordButton).mWord.equals(words.get(iWord))){
-//                    found = true;
-//                    break;
-//                }
-//            }
-//
-//            if(!found){
-//                wordButtons.add(new WordButton(words.get(iWord), false));
-//            }
-//        }
+    void storeWordsInNativeStorage(ArrayList<String> words, Context context){
+        Log.d(TAG, "storeWordsInNativeStorage: ");
+        List<WordButton> wordButtons = new ArrayList<>();
 
         for(int iWord = 0; iWord < words.size(); ++iWord){
             wordButtons.add(new WordButton(words.get(iWord), false));
@@ -239,7 +252,8 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
         notifyAppWidgetDataChanged(context);
     }
     @RequiresApi(api = Build.VERSION_CODES.M)
-    void storePressedWordsInNativeStorage(ArrayList<String> words, Context context, AppWidgetManager appWidgetManager, int appWidgetId){
+    void storePressedWordsInNativeStorage(ArrayList<String> words, Context context){
+        Log.d(TAG, "storePressedWordsInNativeStorage: ");
         List<WordButton> wordButtons = getWordButtonsFromStorage(context);
 
         if(wordButtons == null){
@@ -265,7 +279,8 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
         notifyAppWidgetDataChanged(context);
     }
 
-    void storeWordInNativeStorage(String word, Context context, AppWidgetManager appWidgetManager, int appWidgetId){
+    void storeWordInNativeStorage(String word, Context context){
+        Log.d(TAG, "storeWordInNativeStorage: ");
         List<WordButton> wordButtons = getWordButtonsFromStorage(context);
 
         if(wordButtons == null){
@@ -297,6 +312,8 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     }
 
     static List<WordButton> getWordButtonsFromStorage(Context context){
+
+//        Log.d(TAG, "getWordButtonsFromStorage: ");
         SharedPreferences prefs = context.getSharedPreferences(NATIVE_STORAGE, 0);
 
         Gson gson = new Gson();
@@ -317,6 +334,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     }
 
     static void storeWordButtons(List<WordButton> wordButtons, Context context){
+        Log.d(TAG, "storeWordButtons: ");
         Gson gson = new Gson();
 
         List<Map<String, Object>> wordButtonMaps = new ArrayList<>();
@@ -331,11 +349,13 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     }
 
     static void storeAppWidgetId(int appWidgetId, Context context){
+        Log.d(TAG, "storeAppWidgetId: ");
         SharedPreferences prefs = context.getSharedPreferences(NATIVE_STORAGE, 0);
         prefs.edit().putInt(APP_WIDGET_ID, appWidgetId).apply();
     }
 
     static int getAppWidgetId(Context context){
+        Log.d(TAG, "getAppWidgetId: ");
         SharedPreferences prefs = context.getSharedPreferences(NATIVE_STORAGE, 0);
         return prefs.getInt(APP_WIDGET_ID, 0);
     }

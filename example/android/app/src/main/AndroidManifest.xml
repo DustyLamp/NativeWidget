@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.realapps.nativewidget_example">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
-        android:name="io.flutter.app.FlutterApplication"
+        android:name=".Application"
         android:icon="@mipmap/ic_launcher"
         android:label="nativewidget_example">
 

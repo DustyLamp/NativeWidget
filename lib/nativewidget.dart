@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
@@ -23,6 +24,8 @@ class NativeWidget {
 
   final ReceivePort port = ReceivePort();
 
+  static StreamSubscription portListener;
+
   factory NativeWidget() {
     if(_nativeWidget == null){
       _nativeWidget = NativeWidget._internal();
@@ -33,14 +36,14 @@ class NativeWidget {
   NativeWidget._internal(){
     print(tag + "Constructing Native Widget");
     WidgetsFlutterBinding.ensureInitialized();
+    
+    registerAndListenToPort();
+  }
 
-    print(tag + "Registering port with name: " + isolateName);
-    IsolateNameServer.registerPortWithName(
-      port.sendPort,
-      isolateName,
-    );
-
-    port.listen(_handleIsolateData);
+  dispose(){
+    print(tag + "Disposing...");
+    portListener?.cancel();
+    portListener = null;
   }
 
   static Future<bool> initialize() async {
@@ -56,6 +59,50 @@ class NativeWidget {
         'NativeWidget.start', <dynamic>[handle.toRawHandle()]);
     return r ?? false;
   }
+  
+  void registerAndListenToPort(){
+    print(tag + "Registering port with name: " + isolateName);
+    bool registrationSuccessful = IsolateNameServer.registerPortWithName(
+      port.sendPort,
+      isolateName,
+    );
+
+    // Isolate.current.addOnExitListener(port.sendPort, );
+
+    print(tag + "Current isolateId: " + Isolate.current.hashCode.toString());
+
+    if(registrationSuccessful == false){
+      print(tag + "Registration of port unsuccessful - likely already existed");
+      return;
+    }
+
+    if(registrationSuccessful == null){
+      print(tag + "Registration of port unsuccessful - failed for some reason");
+      return;
+    }
+
+    portListener = port.listen(_handleIsolateData);
+
+    portListener.onDone(handlePortDone);
+
+    // portListener.onData(handleNewPortData);
+
+    portListener.onError(handlePortError);
+  }
+
+  static void handlePortDone() { 
+      print(tag + "Port Done");
+    }
+
+  static void handleNewPortData(data) {
+      print(tag + "Port got data: " + data?.toString());
+    }
+
+  static void handlePortError(error) {
+      print(tag + "Port error: " + error?.toString());
+      portListener?.cancel();
+      portListener = null;
+    }
 
   void _handleIsolateData(dynamic callbackDetails){
     print(tag + "Handling data from isolate");
@@ -68,12 +115,14 @@ class NativeWidget {
   }
 
   static void registerActionCallbacks(Map<String, Function(dynamic)> callbackDetails) async {
+    print(tag + "Registering action callbacks");
     callbackDetails.forEach((String action, Function(dynamic) callback) async {
       await registerActionCallback(callback, action);
     });
   }
 
   static Future<bool> registerActionCallback(/* Must be static or top level */ Function(dynamic) callback, String action) async {
+    print(tag + "Registering action callback for: " + action);
     if(Platform.isAndroid){
       final CallbackHandle handle = _getCallbackHandle(callback);
       if(handle == null){
@@ -89,6 +138,7 @@ class NativeWidget {
   }
 
   static Future<bool> sendData(String action, dynamic data) async {
+    print(tag + "Sending Data");
     if(Platform.isAndroid){
       final bool r = await _channel.invokeMethod("NativeWidget.sendData", <dynamic>[action, data]);
 
