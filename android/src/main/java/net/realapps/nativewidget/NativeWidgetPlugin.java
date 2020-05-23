@@ -35,9 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.broadcastreceiver.BroadcastReceiverAware;
 import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -45,79 +43,6 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import static net.realapps.nativewidget.NativeWidgetService.PAYLOAD_KEY;
-
-//class ActionBroadcastReceiver {
-//    public String mAction;
-//    public String mBroadcastReceiverName;
-//
-//    ActionBroadcastReceiver(String action, String broadcastReceiverName){
-//        mAction = action;
-//        mBroadcastReceiverName = broadcastReceiverName;
-//    }
-//
-//    ActionBroadcastReceiver(String action, BroadcastReceiver broadcastReceiver){
-//        mAction = action;
-//        mBroadcastReceiverName = broadcastReceiver.getClass().getName();
-//    }
-//
-//    ActionBroadcastReceiver(String action, Class broadcastReceiverClass){
-//        mAction = action;
-//        mBroadcastReceiverName = broadcastReceiverClass.getName();
-//    }
-//}
-
-//class ActionBroadcastReceiverSerializer implements JsonSerializer<List<ActionBroadcastReceiver>>, JsonDeserializer<List<ActionBroadcastReceiver>> {
-//
-//    private static String actionProperty = "action";
-//    private static String broadcastRecieverProperty = "broadcastReceiver";
-//
-//    @Override
-//    public JsonElement serialize(List<ActionBroadcastReceiver> src, Type typeOfSrc, JsonSerializationContext context) {
-//        Gson gson = new Gson();
-//
-//        JsonArray jsonArray = new JsonArray();
-//
-//        for(int iABR = 0; iABR < src.size(); ++iABR){
-//            JsonObject jsonObject = new JsonObject();
-//
-//            jsonObject.add(actionProperty, new JsonPrimitive(src.get(iABR).mAction));
-//            jsonObject.add(broadcastRecieverProperty, new JsonPrimitive(src.get(iABR).mAction));
-//
-//            jsonArray.add(jsonObject);
-//        }
-//
-//        return jsonArray;
-//    }
-//
-//    @Override
-//    public List<ActionBroadcastReceiver> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-//        Gson gson = new Gson();
-//
-//        JsonArray jsonArray = json.getAsJsonArray();
-//
-//        List<ActionBroadcastReceiver> actionBroadcastReceivers = new ArrayList<>();
-//
-//        if(jsonArray == null || jsonArray.size() == 0){
-//            return actionBroadcastReceivers;
-//        }
-//
-//
-//        for(int iABR = 0; iABR < jsonArray.size(); ++iABR){
-//
-//            JsonObject jsonObject = jsonArray.get(iABR).getAsJsonObject();
-//
-//            JsonPrimitive actionJson = jsonObject.get(actionProperty).getAsJsonPrimitive();
-//            JsonPrimitive brJson = jsonObject.get(broadcastRecieverProperty).getAsJsonPrimitive();
-//
-//            String action = gson.fromJson(actionJson, String.class);
-//            BroadcastReceiver broadcastReceiver = gson.fromJson(brJson, BroadcastReceiver.class);
-//
-//            actionBroadcastReceivers.add(new ActionBroadcastReceiver(action, broadcastReceiver));
-//        }
-//
-//        return actionBroadcastReceivers;
-//    }
-//}
 
 public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   private static NativeWidgetPlugin instance;
@@ -127,14 +52,9 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   private MethodChannel nativeWidgetPluginChannel;
 
   static String ACTION_BROADCAST_RECEIVERS = "ACTION_BROADCAST_RECEIVERS";
-//  private static Map<String, Class> registeredBroadcastReceiversForActions = new HashMap<>();
-//  Context mBroadcastReceiverContext;
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-//    nativeWidgetPluginChannel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "net.realapps.nativewidgetplugin");
-//    nativeWidgetPluginChannel.setMethodCallHandler(this);
-//
     onAttachedToEngine(flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getFlutterEngine().getDartExecutor());
   }
 

@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.JobIntentService;
 
 import java.util.Collections;
@@ -100,6 +102,20 @@ public class NativeWidgetService extends JobIntentService {
         }
         Context context = getApplicationContext();
         nativeWidgetBackgroundExecutor.startBackgroundIsolate(context);
+    }
+
+    @Override
+    public IBinder onBind(@NonNull Intent intent) {
+        Log.d(TAG, "onBind: Binding");
+
+        return super.onBind(intent);
+    }
+
+
+    @Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand: ");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
