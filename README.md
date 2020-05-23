@@ -1,8 +1,9 @@
+
 # NativeWidget
 Please note: 
 **This plugin is intended to work with Android only**
 
-A helper plugin for native Android Widgets with Flutter allowing headless communication between an Android Widget and Dart code so you can interact with the AppWidget without needing Flutter open.
+A helper plugin allowing headless communication between your Android Widgets and Dart code so you can interact with the AppWidget without needing a Flutter Application open.
 
 ## Overview
 You can use this plugin to 'plug' your Android App Widget into your Flutter application using *action* strings common to both your Flutter and Native code registered to static or top level dart functions that are stored in shared memory.
@@ -11,8 +12,12 @@ You'll need a set of *action* strings for sending from Native to Dart and anothe
 
 ## Getting Started
 
-1. Add the latest version of this package to pubspec.yaml
-2. Create actions as strings for each use case that will be sent to and from your native code in your dart code
+1. **Add the latest version of this package to pubspec.yaml**
+2. **Create the NativeWidget Plugin instance**
+
+Call `NativeWidget();` as soon as possible in your application to create the instance. This is the first operation in the example in `main()`
+
+3. **Create actions as strings for each use case that will be sent to and from your native code in your dart code**
 ```  
 //Native to Dart
 const  String nativeItemTapped = "NATIVE_ITEM_TAPPED";
@@ -25,7 +30,7 @@ const  String receiveWords = "RECEIVE_WORDS";
 const  String newWord = "NEW_WORD";
 const  String pressedWords = "PRESSED_WORDS";
 ```
-3. Create **static or top level** functions for each action that will be **sent from** native code
+4. **Create *static or top level* functions for each action that will be *sent from* native code**
 ```
 static void handleGetWords(dynamic args) async {
 	print("Handling Get Words Request");
@@ -33,7 +38,7 @@ static void handleGetWords(dynamic args) async {
 	//Do some code
 }
 ```
-4. Register these functions as callbacks that will be called when the corresponding  action is received from native code
+5. **Register these functions as callbacks that will be called when the corresponding  action is received from native code**
 ```
 NativeWidget.registerActionCallbacks({
 	getWords: _MyAppState.handleGetWords,
@@ -42,6 +47,15 @@ NativeWidget.registerActionCallbacks({
 });
 ```
 5. Register your AppWidgets as the receivers for actions **sent to** native code in MainActivity and Application
+6. **Initialize the NativeWidget plugin**
+
+	Add:
+```
+NativeWidget.initialize();
+```
+I recommend to add this after you've registered your callback functions and actions in step 5.
+
+7. **Register your AppWidgets as the receivers for actions *sent to* native code**
 ```
 @Override  
 protected void onCreate(Bundle savedInstanceState) {  
@@ -59,6 +73,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 *Note: Currently each action can only be registered to one App Widget as action are considered unique.*
 
+8. **Update the android manifest to use the NativeWidgetService**
 In `AndroidManifest.xml` change `android:name` to ".Application" like so:
 
 ```
