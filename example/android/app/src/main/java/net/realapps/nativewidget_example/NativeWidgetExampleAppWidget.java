@@ -171,18 +171,14 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
     }
 
     void getWords(Context context){
-        Intent retrieveWordsIntent = new Intent(context, this.getClass());
-        retrieveWordsIntent.setAction(GET_WORDS);
-
-        NativeWidgetService.enqueueWork(context, retrieveWordsIntent);
+        Log.d(TAG, "getWords: ");
+        NativeWidgetService.sendData(context, GET_WORDS);
     }
 
     void refreshWords(Context context){
         Log.d(TAG, "refreshWords: Requesting Word Refresh");
-        Intent sendActionIntent = new Intent(context, NativeWidgetService.class);
-        sendActionIntent.setAction(REFRESH_WORDS);
-        NativeWidgetService.enqueueWork(context, sendActionIntent);
 
+        NativeWidgetService.sendData(context, REFRESH_WORDS);
         setRefreshWordsAlarm(context);
     }
 
@@ -217,11 +213,7 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
         storeWordButtons(wordButtons, context);
         notifyAppWidgetDataChanged(context);
 
-        Intent sendActionIntent = new Intent(context, NativeWidgetService.class);
-        sendActionIntent.setAction(NATIVE_ITEM_TAPPED);
-        sendActionIntent.putExtra(NativeWidgetService.PAYLOAD_KEY, (Serializable) word);
-
-        NativeWidgetService.enqueueWork(context, sendActionIntent);
+        NativeWidgetService.sendData(context, NATIVE_ITEM_TAPPED, word);
     }
     void handleFlutterItemTapped(Context context, String word){
         Log.d(TAG, "handleFlutterItemTapped: ");
@@ -345,7 +337,6 @@ public class NativeWidgetExampleAppWidget extends AppWidgetProvider {
 
         SharedPreferences prefs = context.getSharedPreferences(NATIVE_STORAGE, 0);
         prefs.edit().putString(WORD_BUTTONS, wordButtonsString).apply();
-
     }
 
     static void storeAppWidgetId(int appWidgetId, Context context){

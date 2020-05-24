@@ -6,6 +6,9 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
+import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 const MethodChannel _backgroundChannel =
     MethodChannel('net.realapps.realtracker/native_widget_service_background');
 
@@ -14,6 +17,7 @@ typedef CallbackHandle _GetCallbackHandle(Function callback);
 class NativeWidget {
   static String tag = "Native Widget: ";
   static String isolateName = "native_widget_isolate";
+  static String initiationCompleteCallbackKey = "INITIATION_COMPLETE_CALLBACK_KEY";
   static const MethodChannel _channel =
       const MethodChannel('net.realapps.nativewidgetplugin');
   
@@ -21,6 +25,8 @@ class NativeWidget {
       (Function callback) => PluginUtilities.getCallbackHandle(callback);
   
   static NativeWidget _nativeWidget = NativeWidget._internal();
+
+  static BehaviorSubject<bool> onInitiationCompleted = BehaviorSubject<bool>(); 
 
   final ReceivePort port = ReceivePort();
 
@@ -42,8 +48,12 @@ class NativeWidget {
 
   dispose(){
     print(tag + "Disposing...");
+
     portListener?.cancel();
     portListener = null;
+
+    onInitiationCompleted?.close();
+    onInitiationCompleted = null;
   }
 
   static Future<bool> initialize() async {
@@ -66,8 +76,6 @@ class NativeWidget {
       port.sendPort,
       isolateName,
     );
-
-    // Isolate.current.addOnExitListener(port.sendPort, );
 
     print(tag + "Current isolateId: " + Isolate.current.hashCode.toString());
 
@@ -114,6 +122,22 @@ class NativeWidget {
     callback(args);
   }
 
+  static Future<bool> registerInitiationCompleteCallback(Function(bool initiationSuccessful) onInitiationCompleteCallback) async {
+
+    if(Platform.isAndroid){
+      final CallbackHandle handle = _getCallbackHandle(onInitiationCompleteCallback);
+      if(handle == null){
+        return false;
+      }
+
+      
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      return await sharedPreferences.setInt(initiationCompleteCallbackKey, handle.toRawHandle());
+    }
+
+    return false;
+  }
+
   static void registerActionCallbacks(Map<String, Function(dynamic)> callbackDetails) async {
     print(tag + "Registering action callbacks");
     callbackDetails.forEach((String action, Function(dynamic) callback) async {
@@ -149,7 +173,7 @@ class NativeWidget {
   }
 }
 
-void callbackDispatcher() {
+void callbackDispatcher() async {
   print(NativeWidget.tag +
       "Callback Dispatcher preparing background method channel");
 
@@ -188,4 +212,17 @@ void callbackDispatcher() {
   });
 
   _backgroundChannel.invokeMethod<bool>('NativeWidget.initialized');
+  NativeWidget.onInitiationCompleted.sink.add(true);
+
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+  int callbackRawHandle = sharedPreferences.getInt(NativeWidget.initiationCompleteCallbackKey);
+
+  final Function callback = PluginUtilities.getCallbackFromHandle(
+    CallbackHandle.fromRawHandle(callbackRawHandle)
+  );
+
+  if(callback != null){
+    callback(true);
+  }
 }

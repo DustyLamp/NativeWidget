@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.JobIntentService;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,8 +35,21 @@ public class NativeWidgetService extends JobIntentService {
 
     private static NativeWidgetBackgroundExecutor nativeWidgetBackgroundExecutor;
 
+    public static void sendData(Context context, String action){
+        sendData(context, action, null);
+    }
 
-    public static void enqueueWork(Context context, Intent intent){
+    public static void sendData(Context context, String action, Serializable data) {
+        Intent sendActionIntent = new Intent(context, NativeWidgetService.class);
+        sendActionIntent.setAction(action);
+        if (data != null) {
+            sendActionIntent.putExtra(NativeWidgetService.PAYLOAD_KEY, data);
+        }
+
+        NativeWidgetService.enqueueWork(context, sendActionIntent);
+    }
+
+    private static void enqueueWork(Context context, Intent intent){
         Log.d(TAG, "enqueueWork: Enqueuing Work");
 
         String action = intent.getAction();
