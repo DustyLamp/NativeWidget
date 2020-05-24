@@ -214,15 +214,22 @@ void callbackDispatcher() async {
   _backgroundChannel.invokeMethod<bool>('NativeWidget.initialized');
   NativeWidget.onInitiationCompleted.sink.add(true);
 
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  try{      
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-  int callbackRawHandle = sharedPreferences.getInt(NativeWidget.initiationCompleteCallbackKey);
+    int callbackRawHandle = sharedPreferences.getInt(NativeWidget.initiationCompleteCallbackKey);
 
-  final Function callback = PluginUtilities.getCallbackFromHandle(
-    CallbackHandle.fromRawHandle(callbackRawHandle)
-  );
+    final Function callback = PluginUtilities.getCallbackFromHandle(
+      CallbackHandle.fromRawHandle(callbackRawHandle)
+    );
 
-  if(callback != null){
-    callback(true);
+    if(callback != null){
+      callback(true);
+    }
+    
   }
+  catch (error) {
+    print(NativeWidget.tag + "Error while attempting initiation completed callback");
+  }
+
 }
