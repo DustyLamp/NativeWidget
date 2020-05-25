@@ -85,10 +85,6 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
 
   private static void storeActionBroadCastReceivers(Map<String, String> actionBroadcastReceivers, Context context){
     SharedPreferences prefs = context.getSharedPreferences(NativeWidgetService.SHARED_PREFERENCES_KEY, 0);
-//    GsonBuilder gsonBuilder = new GsonBuilder();
-//    gsonBuilder.registerTypeAdapter(ArrayList.class, new ActionBroadcastReceiverSerializer());
-
-//    Gson gson = gsonBuilder.create();
 
     Gson gson = new Gson();
     String json = gson.toJson(actionBroadcastReceivers);
@@ -107,8 +103,6 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
       return actionBroadcastReceivers;
     }
 
-//    GsonBuilder gsonBuilder = new GsonBuilder();
-//    gsonBuilder.registerTypeAdapter(ActionBroadcastReceiver.class, new ActionBroadcastReceiverSerializer());
     Gson gson = new Gson(); //gsonBuilder.create();
 
     actionBroadcastReceivers = gson.fromJson(json, HashMap.class);
@@ -137,22 +131,11 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
 
     Map<String, String> actionBroadcastReceivers = getActionBroadcastReceivers(context);
 
-//    boolean found = false;
-//    for(int iABR = 0; iABR < actionBroadcastReceivers.size(); ++iABR){
-//        if(actionBroadcastReceivers.get(iABR).mAction.equals(action)){
-//            found = true;
-//        }
-//    }
-
-
     if(actionBroadcastReceivers.get(action) != null){
       actionBroadcastReceivers.remove(action);
     }
 
-//    Class something = Class.forName("things");
-
     try {
-//        BroadcastReceiver br = (BroadcastReceiver) receiver.newInstance();
         actionBroadcastReceivers.put(action, receiver.getName());
         storeActionBroadCastReceivers(actionBroadcastReceivers, context);
     } catch (Exception e) {
@@ -189,25 +172,57 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
         Object data = args.get(1);
 
         Log.d(TAG, "onMethodCall: what's in the box?" + data);
+        sendDataToBroadcastReceiver(action, data);
 
-        Class<BroadcastReceiver> actionBroadcastReceiver = getActionBroadcastReceiverClass(context, action);
-
-        if(actionBroadcastReceiver == null || context == null){
-          Log.d(TAG, "onMethodCall: Don't have the means to broadcast the action to the receiver");
-          return;
-        }
-
-        Intent broadcastIntent = new Intent(context, actionBroadcastReceiver);
-        broadcastIntent.putExtra(PAYLOAD_KEY, (Serializable) data);
-        broadcastIntent.setAction(action);
-
-        PendingIntent actionPendingIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        actionPendingIntent.send();
-
+      } else if (method.equals("NativeWidget.sendAction")){
+        String action = args.get(0).toString();
+        Log.d(TAG, "onMethodCall: act on: " + action);
+        sendActionToBroadcastReceiver(action);
       }
 
-    } catch (PluginRegistrantException | PendingIntent.CanceledException e) {
+    } catch (PluginRegistrantException e) {
       result.error("error", "NativeWidget error: " + e.getMessage(), null);
+    }
+  }
+
+  private void sendActionToBroadcastReceiver(String action){
+
+    Class<BroadcastReceiver> actionBroadcastReceiver = getActionBroadcastReceiverClass(context, action);
+
+    if(actionBroadcastReceiver == null || context == null){
+      Log.d(TAG, "sendDataToBroadcastReceiver: Don't have the means to broadcast the action to the receiver");
+      return;
+    }
+
+    Intent broadcastIntent = new Intent(context, actionBroadcastReceiver);
+    broadcastIntent.setAction(action);
+
+    sendIntentToBroadcastReceiver(broadcastIntent);
+  }
+
+  private void sendDataToBroadcastReceiver(String action, Object data){
+
+    Class<BroadcastReceiver> actionBroadcastReceiver = getActionBroadcastReceiverClass(context, action);
+
+    if(actionBroadcastReceiver == null || context == null){
+      Log.d(TAG, "sendDataToBroadcastReceiver: Don't have the means to broadcast the action to the receiver");
+      return;
+    }
+
+    Intent broadcastIntent = new Intent(context, actionBroadcastReceiver);
+    broadcastIntent.putExtra(PAYLOAD_KEY, (Serializable) data);
+    broadcastIntent.setAction(action);
+
+    sendIntentToBroadcastReceiver(broadcastIntent);
+  }
+
+  private void sendIntentToBroadcastReceiver(Intent intent){
+    PendingIntent actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    try {
+      actionPendingIntent.send();
+    } catch (PendingIntent.CanceledException e) {
+      Log.e(TAG, "sendDataToBroadcastReceiver: Error: " + e.getMessage());
+      e.printStackTrace();
     }
   }
 

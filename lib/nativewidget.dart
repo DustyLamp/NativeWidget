@@ -171,6 +171,17 @@ class NativeWidget {
 
     return false;
   }
+
+  static Future<bool> sendAction(String action) async {
+    print(tag + "Sending Action");
+    if(Platform.isAndroid){
+      final bool r = await _channel.invokeMethod("NativeWidget.sendAction", <dynamic>[action]);
+
+      return r ?? false;
+    }
+    
+    return false;
+  }
 }
 
 void callbackDispatcher() async {
