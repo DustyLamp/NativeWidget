@@ -30,6 +30,6 @@ public class Application extends FlutterApplication implements PluginRegistry.Pl
     @Override
     public void registerWith(PluginRegistry registry) {
         NativeWidgetPlugin.registerWith(
-                registry.registrarFor("net.realapps.realtracker.NativeWidgetPlugin"));
+                registry.registrarFor("net.realapps.nativewidget.NativeWidgetPlugin"));
     }
 }

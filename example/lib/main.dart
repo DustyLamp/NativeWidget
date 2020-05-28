@@ -81,7 +81,7 @@ class _MyAppState extends State<MyApp> {
 
     await preferences.setStringList(
         sharedPreferenceWordsPressedKey, activeWords);
-
+  
     _sendWordTapped(word);
   }
 

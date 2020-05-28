@@ -13,10 +13,12 @@ dependencies:
     sdk: flutter
   rxdart: ^0.24.1
   shared_preferences: ^0.5.7+3
+  couchbase_lite: ^2.7.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

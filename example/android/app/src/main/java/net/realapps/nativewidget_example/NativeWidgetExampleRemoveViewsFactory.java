@@ -15,8 +15,6 @@ import java.util.List;
 
 public class NativeWidgetExampleRemoveViewsFactory implements RemoteViewsService.RemoteViewsFactory {
 
-    NativeWidgetExampleRemoveViewsFactory instance;
-
     static String WORD_NAME = "WORD_NAME";
     static String VIEW_INDEX = "VIEW_INDEX";
 
@@ -25,22 +23,11 @@ public class NativeWidgetExampleRemoveViewsFactory implements RemoteViewsService
     private Context context;
     private int appWidgetId;
 
-
-//    String[] wordList = {
-//            "Cry",
-//            "Lick",
-//            "Laugh",
-//            "Pop",
-//            "Press",};
-
-    NativeWidgetExampleRemoveViewsFactory(Context context, Intent intent) throws Exception {
+    NativeWidgetExampleRemoveViewsFactory(Context context, Intent intent) {
         super();
 
         this.context = context;
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-    }
-
-    public NativeWidgetExampleRemoveViewsFactory(){
     }
 
     @Override

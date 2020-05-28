@@ -143,6 +143,24 @@ You can see this in the example if you restart your phone and refresh / press wo
 
 I'm working on it, but if you can suggest how to fix this, please let me know!
 
+### registerWith not called in older Flutter applications
+
+If you get an error like: 
+
+"Unhandled Exception: MissingPluginException(No implementation found for ... " then you might need to add the `meta-data` below to your `AndroidManifest.xml` 
+
+```
+<application>
+	
+	...
+
+	<meta-data
+		android:name="flutterEmbedding"
+		android:value="2" />
+	
+</application>
+```
+
 ### App has to open at least once
 Your Flutter application must be opened at least once in order to use this Plugin so that the actions and static functions can be registered.
 

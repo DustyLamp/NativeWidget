@@ -12,26 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.Serializable;
-import java.lang.annotation.Native;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -55,10 +39,12 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    Log.d(TAG, "onAttachedToEngine: ");
     onAttachedToEngine(flutterPluginBinding.getApplicationContext(), flutterPluginBinding.getFlutterEngine().getDartExecutor());
   }
 
   public static void registerWith(Registrar registrar) {
+    Log.d(TAG, "registerWith: ");
     if(instance == null){
       instance = new NativeWidgetPlugin();
     }
@@ -67,6 +53,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   public void onAttachedToEngine(Context applicationContext, BinaryMessenger messenger) {
+    Log.d(TAG, "onAttachedToEngine: ");
     synchronized (initializationLock) {
       if (nativeWidgetPluginChannel != null) {
         return;
@@ -84,6 +71,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private static void storeActionBroadCastReceivers(Map<String, String> actionBroadcastReceivers, Context context){
+    Log.d(TAG, "storeActionBroadCastReceivers: ");
     SharedPreferences prefs = context.getSharedPreferences(NativeWidgetService.SHARED_PREFERENCES_KEY, 0);
 
     Gson gson = new Gson();
@@ -92,6 +80,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private static Map<String, String> getActionBroadcastReceivers(Context context){
+    Log.d(TAG, "getActionBroadcastReceivers: ");
 
   Map<String, String> actionBroadcastReceivers = new HashMap<>();
 
@@ -112,6 +101,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private static Class<BroadcastReceiver> getActionBroadcastReceiverClass(Context context, String action){
+    Log.d(TAG, "getActionBroadcastReceiverClass: ");
 
       Map<String, String> actionBroadcastReceivers = getActionBroadcastReceivers(context);
 
@@ -128,6 +118,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
 
   @RequiresApi(api = Build.VERSION_CODES.KITKAT)
   static public void registerReceiverForAction(Context context, String action, Class receiver) {
+    Log.d(TAG, "registerReceiverForAction: ");
 
     Map<String, String> actionBroadcastReceivers = getActionBroadcastReceivers(context);
 
@@ -145,9 +136,11 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
 
   @Override
   public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+    Log.d(TAG, "onMethodCall: ");
     String method = call.method;
     ArrayList args = call.arguments();
 
+    Log.d(TAG, "onMethodCall: Method is: " + method);
 
     try {
       if (method.equals("NativeWidget.start")) {
@@ -186,6 +179,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void sendActionToBroadcastReceiver(String action){
+    Log.d(TAG, "sendActionToBroadcastReceiver: ");
 
     Class<BroadcastReceiver> actionBroadcastReceiver = getActionBroadcastReceiverClass(context, action);
 
@@ -201,6 +195,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void sendDataToBroadcastReceiver(String action, Object data){
+    Log.d(TAG, "sendDataToBroadcastReceiver: ");
 
     Class<BroadcastReceiver> actionBroadcastReceiver = getActionBroadcastReceiverClass(context, action);
 
@@ -217,6 +212,7 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
   }
 
   private void sendIntentToBroadcastReceiver(Intent intent){
+    Log.d(TAG, "sendIntentToBroadcastReceiver: ");
     PendingIntent actionPendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     try {
       actionPendingIntent.send();
