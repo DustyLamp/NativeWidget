@@ -46,7 +46,6 @@ NativeWidget.registerActionCallbacks({
 	nativeItemTapped: _MyAppState.handleItemTapped,
 });
 ```
-5. Register your AppWidgets as the receivers for actions **sent to** native code in MainActivity and Application
 6. **Initialize the NativeWidget plugin**
 
 	Add:
@@ -85,22 +84,6 @@ In `AndroidManifest.xml` change `android:name` to ".Application" like so:
 ```
 
 See the example for... an example.
-
-6. Update the android manifest to use the NativeWidgetService
-```
-<application ...>
-
-...
-
-	<service android:name="net.realapps.nativewidget.NativeWidgetService"  
-	  android:enabled="true"  
-	  android:exported="false"  
-	  android:permission="android.permission.BIND_JOB_SERVICE"/>
-
-...
-
-</application>
-```
 
 ## Sending Data to Native Code
 Send the action along with the data that you'd like to send to `NativeWidget.sendData(String action, dynamic data)`
