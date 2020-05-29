@@ -62,11 +62,15 @@ public class NativeWidgetPlugin implements FlutterPlugin, MethodCallHandler {
       Log.i(TAG, "onAttachedToEngine");
       this.context = applicationContext;
 
-      nativeWidgetPluginChannel =
-          new MethodChannel(
-              messenger, "net.realapps.nativewidgetplugin");
+      if(messenger != null){
+        nativeWidgetPluginChannel =
+            new MethodChannel(
+                messenger, "net.realapps.nativewidgetplugin");
 
-      nativeWidgetPluginChannel.setMethodCallHandler(this);
+        nativeWidgetPluginChannel.setMethodCallHandler(this);
+      } else {
+        Log.d(TAG, "onAttachedToEngine: binary messenger was null");
+      }
     }
   }
 

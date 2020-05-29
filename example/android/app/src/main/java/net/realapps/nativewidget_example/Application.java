@@ -1,6 +1,7 @@
 package net.realapps.nativewidget_example;
 
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -15,7 +16,9 @@ import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.NEW
 import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.PRESSED_WORDS;
 import static net.realapps.nativewidget_example.NativeWidgetExampleAppWidget.RECEIVE_WORDS;
 
-public class Application extends FlutterApplication implements PluginRegistry.PluginRegistrantCallback {
+public class Application extends FlutterApplication implements PluginRegistry.PluginRegistrantCallback{
+    private static final String TAG = "RealTrackerApplication";
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onCreate() {
@@ -29,7 +32,10 @@ public class Application extends FlutterApplication implements PluginRegistry.Pl
 
     @Override
     public void registerWith(PluginRegistry registry) {
-        NativeWidgetPlugin.registerWith(
+        Log.d(TAG, "registerWith: ");
+        if(registry != null){
+            NativeWidgetPlugin.registerWith(
                 registry.registrarFor("net.realapps.nativewidget.NativeWidgetPlugin"));
+        }
     }
 }
