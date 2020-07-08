@@ -1,4 +1,4 @@
 #import <Flutter/Flutter.h>
 
-// @interface NativeWidgetPlugin : NSObject<FlutterPlugin>
+@interface NativeWidgetPlugin : NSObject<FlutterPlugin>
 @end
