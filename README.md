@@ -110,7 +110,7 @@ Check out the example code showing how to hook everything up.
 
 Run it and press some words in an App Widget or in Flutter until your heart is content. 
 
-Some people think pressing words is for losers... but really, *it's for Heros.*
+Some people think pressing words is for losers... but really, *it's for Heroes.*
 
 ## Dependencies and References
 This plugin is heavily based on [AndroidAlarmManager](https://github.com/flutter/plugins/tree/master/packages/android_alarm_manager) of which I would be completely lost without.
