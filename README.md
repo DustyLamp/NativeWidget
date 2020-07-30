@@ -55,7 +55,7 @@ NativeWidget.initialize();
 I recommend to add this after you've registered your callback functions and actions in step 5.
 
 7. **Register your AppWidgets as the receivers for actions *sent to* native code**
-```dart
+```java
 @Override  
 protected void onCreate(Bundle savedInstanceState) {  
   super.onCreate(savedInstanceState);  
@@ -75,7 +75,7 @@ protected void onCreate(Bundle savedInstanceState) {
 8. **Update the android manifest to use the NativeWidgetService**
 In `AndroidManifest.xml` change `android:name` to ".Application" like so:
 
-```dart
+```xml
 <application
         android:name=".Application"
 		...>
@@ -132,7 +132,7 @@ If you get an error like:
 
 "Unhandled Exception: MissingPluginException(No implementation found for ... " then you might need to add the `meta-data` below to your `AndroidManifest.xml` 
 
-```dart
+```xml
 <application>
 	
 	...
