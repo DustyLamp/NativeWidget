@@ -18,7 +18,7 @@ You'll need a set of *action* strings for sending from Native to Dart and anothe
 Call `NativeWidget();` as soon as possible in your application to create the instance. This is the first operation in the example in `main()`
 
 3. **Create actions as strings for each use case that will be sent to and from your native code in your dart code**
-```  
+```dart  
 //Native to Dart
 const  String nativeItemTapped = "NATIVE_ITEM_TAPPED";
 const  String refreshWords = "REFRESH_WORDS";
@@ -31,7 +31,7 @@ const  String newWord = "NEW_WORD";
 const  String pressedWords = "PRESSED_WORDS";
 ```
 4. **Create *static or top level* functions for each action that will be *sent from* native code**
-```
+```dart
 static void handleGetWords(dynamic args) async {
 	print("Handling Get Words Request");
 	
@@ -39,7 +39,7 @@ static void handleGetWords(dynamic args) async {
 }
 ```
 5. **Register these functions as callbacks that will be called when the corresponding  action is received from native code**
-```
+```dart
 NativeWidget.registerActionCallbacks({
 	getWords: _MyAppState.handleGetWords,
 	refreshWords: _MyAppState.handleRefreshWords,
@@ -49,13 +49,13 @@ NativeWidget.registerActionCallbacks({
 6. **Initialize the NativeWidget plugin**
 
 	Add:
-```
+```dart
 NativeWidget.initialize();
 ```
 I recommend to add this after you've registered your callback functions and actions in step 5.
 
 7. **Register your AppWidgets as the receivers for actions *sent to* native code**
-```
+```dart
 @Override  
 protected void onCreate(Bundle savedInstanceState) {  
   super.onCreate(savedInstanceState);  
@@ -75,7 +75,7 @@ protected void onCreate(Bundle savedInstanceState) {
 8. **Update the android manifest to use the NativeWidgetService**
 In `AndroidManifest.xml` change `android:name` to ".Application" like so:
 
-```
+```dart
 <application
         android:name=".Application"
 		...>
@@ -87,7 +87,7 @@ See the example for... an example.
 
 ## Sending Data to Native Code
 Send the action along with the data that you'd like to send to `NativeWidget.sendData(String action, dynamic data)`
-```
+```dart
 void  _sendWordTapped(String word) {
 	print("Sending word tapped");
 	NativeWidget.sendData(flutterItemTapped, word);
@@ -96,7 +96,7 @@ void  _sendWordTapped(String word) {
 
 ## Receiving Data from Native Code
 Handle the actions in your AppWidget's `onReceive(...)` function. The data that is sent is wrapped up ast a serializable in the intent with the key `PAYLOAD_KEY`. 
-```
+```dart
 if(intent.getAction().equals(FLUTTER_ITEM_TAPPED)){  
   String word = intent.getSerializableExtra(NativeWidgetService.PAYLOAD_KEY).toString();
   Log.d(TAG, "onReceive: Got word tapped: " + word);
@@ -132,7 +132,7 @@ If you get an error like:
 
 "Unhandled Exception: MissingPluginException(No implementation found for ... " then you might need to add the `meta-data` below to your `AndroidManifest.xml` 
 
-```
+```dart
 <application>
 	
 	...
